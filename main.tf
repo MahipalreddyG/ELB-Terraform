@@ -3,6 +3,9 @@ provider "aws" {
   secret_key = "******************************"
   region     = "us-west-2"
 }
+
+# Launch two instances and install apache and tomcat
+
 resource "aws_instance" "web1" {
   ami = "ami-4e79ed36"
   instance_type = "t2.micro"
@@ -43,6 +46,9 @@ provisioner "remote-exec" {
       ]
   }
  }
+
+# Create security group for ELB
+
 resource "aws_security_group" "elb" {
   name = "terraform-example-elb"
   egress {
@@ -58,6 +64,9 @@ resource "aws_security_group" "elb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+# Creating  ELB
+
  resource "aws_elb" "elb1" {
   name = "terraform-elb"
   security_groups = ["${aws_security_group.elb.id}"]
@@ -75,6 +84,9 @@ resource "aws_security_group" "elb" {
     instance_port = "8080"
     instance_protocol = "http"
   }
+  
+  # Attache two instances to ELB
+  
   instances = ["${aws_instance.web1.id}","${aws_instance.web2.id}"]
   cross_zone_load_balancing = true
   idle_timeout = 400
